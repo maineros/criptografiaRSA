@@ -1,0 +1,37 @@
+# arquivos-objeto
+*.o
+*.obj
+
+# binários executáveis
+*.exe
+*.out
+*.a
+*.so
+*.dll
+
+# diretórios de build
+/build/
+/bin/
+/lib/
+
+# arquivos de depuração
+*.dSYM/
+*.d
+
+# arquivos de log
+*.log
+
+# visual studio code
+.vscode/
+.vscode/settings.json
+.vscode/launch.json
+.vscode/tasks.json
+
+# outras configurações
+*.swp
+*.swo
+*.tmp
+
+# arquivos específicos do sistema operacional
+.DS_Store    # MacOS
+Thumbs.db    # Windows
