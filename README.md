@@ -21,6 +21,6 @@ Para rodar o código, é necessário ter o WSL instalado. O WSL (Windows Subsyst
 * Após isso, seu arquivo deverá ser executado corretamente
 
 ## Instalação do programa
-* Digite no terminal do WSL o comando ```git clone {inserir link do repo}```
+* Digite no terminal do WSL o comando ```git clone https://github.com/maineros/criptografiaRSA```
 * Acesse a pasta do projeto com ```cd nome_da_pasta_onde_voce_salvou```
 * Compile o programa com ```gcc main.c -o main``` e execute com ```./main```
