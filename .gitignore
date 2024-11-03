@@ -1,9 +1,13 @@
+# arquivos gerados pelo programa
+*.txt
+
 # arquivos-objeto
 *.o
 *.obj
 
 # binários executáveis
 *.exe
+*.o
 *.out
 *.a
 *.so
