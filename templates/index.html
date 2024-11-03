@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Criptografia RSA</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <h1>Criptografia RSA</h1>
+    <button onclick="generateKey()">Gerar Chave Pública</button>
+    <input type="text" id="message" placeholder="Digite a mensagem">
+    <button onclick="encryptMessage()">Criptografar</button>
+    <button onclick="decryptMessage()">Descriptografar</button>
+    <button onclick="viewMessage()">Ver Mensagem</button>
+
+    <div id="output"></div>
+
+    <script>
+        async function generateKey() {
+            const response = await fetch('/generate_key', { method: 'POST' });
+            const data = await response.json();
+            document.getElementById('output').innerText = data.output;
+        }
+
+        async function encryptMessage() {
+            const message = document.getElementById('message').value;
+            const response = await fetch('/encrypt', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ message })
+            });
+            const data = await response.json();
+            document.getElementById('output').innerText = data.output;
+        }
+
+        async function decryptMessage() {
+            const response = await fetch('/decrypt', { method: 'POST' });
+            const data = await response.json();
+            document.getElementById('output').innerText = data.output;
+        }
+
+        async function viewMessage() {
+            const response = await fetch('/view_message', { method: 'POST' });
+            const data = await response.json();
+            document.getElementById('output').innerText = data.output;
+        }
+    </script>
+</body>
+</html>
