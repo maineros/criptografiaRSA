@@ -59,9 +59,8 @@ void menuOpcoes()
             break;
         case 5:
             limparTela();
-            printf("\nA equipe agradece pelo uso do programa! :)\n\n");
+            printf("\nA equipe agradece pelo uso do programa!\n\n");
             exit(0);
-            break;
         default:
             limparTela();
             printf("Opcao invalida. Tente novamente digitando um numero valido.\n");
@@ -120,12 +119,10 @@ void gerarChavePublica()
         mpz_clears(p, q, e, n, phi, NULL);
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
-    gmp_fprintf(chavePublicaArq, "p = %Zd\nq = %Zd\ne = %Zd\n", p, q, e);
+    gmp_fprintf(chavePublicaArq, "p = %Zd\nq = %Zd\nn = %Zd\ne = %Zd\n", p, q, n, e);
     fclose(chavePublicaArq);
 
     barraDeCarregamento("Geracao de chave publica em andamento...", "Geracao concluida!", 50);
@@ -134,8 +131,6 @@ void gerarChavePublica()
     mpz_clears(p, q, e, n, phi, NULL);
 
     system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-    menuOpcoes();
-
     return;
 }
 
@@ -206,34 +201,56 @@ void criptografarMensagem()
 {
     limparTela();
     printf("\nOpcao escolhida: Criptografar mensagem.\n\n");
-
+    
     mpz_t p, q, e, n;
     mpz_inits(p, q, e, n, NULL);
 
-    FILE *chavePublicaArq = fopen("chave_publica.txt", "r+");
-    if (chavePublicaArq == NULL)
-    {
-        printf("\nAinda nao foi criada uma chave publica!\n\n");
+    printf("Deseja inserir a chave publica manualmente ou extrai-la de um arquivo chave_publica.txt?\n");
+    printf("Digite aqui (M para inserir manualmente ou A para arquivo): ");
+    
+    char escolha;
+    scanf(" %c", &escolha);
 
-        mpz_clears(p, q, e, n, NULL);
+    switch (escolha)
+    {
+    case 'M':
+        printf("\n\nDigite o valor de \"e\": ");
+        gmp_scanf("%Zd", e);
+        printf("\nDigite o valor de \"n\": ");
+        gmp_scanf("%Zd", n);
+
+        break;
+    case 'A':
+        FILE *chavePublicaArq = fopen("chave_publica.txt", "r+");
+        if (chavePublicaArq == NULL)
+        {
+            printf("\nAinda nao foi criada uma chave publica!\n\n");
+
+            mpz_clears(p, q, e, n, NULL);
+
+            system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
+            return;
+        }
+
+        gmp_fscanf(chavePublicaArq, "p = %Zd\nq = %Zd\nn = %Zd\ne = %Zd\n", p, q, n, e);
+
+        fclose(chavePublicaArq);
+
+        break;
+    default:
+        printf("O caractere inserido nao eh valido.\n\n");
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
-    gmp_fscanf(chavePublicaArq, "p = %Zd\nq = %Zd\ne = %Zd\n", p, q, e);
-
-    mpz_mul(n, p, q);
-
     getchar();
 
-    fclose(chavePublicaArq);
-
     char texto[1001];
-    printf("Insira o texto a ser criptografado (ate 1000 caracteres): ");
+    printf("\n\nInsira o texto a ser criptografado (ate 1000 caracteres): ");
     fgets(texto, 1000, stdin);
+
+    int tamanho = strlen(texto);
 
     mpz_t textoPuro, textoCriptografado;
     mpz_inits(textoPuro, textoCriptografado, NULL);
@@ -246,16 +263,15 @@ void criptografarMensagem()
         mpz_clears(textoPuro, textoCriptografado, NULL);
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
-    int tamanho = strlen(texto);
     for (int i = 0; i < tamanho; i++)
     {
         mpz_set_ui(textoPuro, (unsigned char)texto[i]);
+
         mpz_powm(textoCriptografado, textoPuro, e, n);
+
         gmp_fprintf(textoCriptografadoArq, "%Zd ", textoCriptografado);
     }
 
@@ -268,8 +284,6 @@ void criptografarMensagem()
     printf("\nTexto criptografado com sucesso e salvo em texto_criptografado.txt\n\n");
     
     system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-    menuOpcoes();
-
     return;
 }
 
@@ -289,14 +303,10 @@ void descriptografarMensagem()
         mpz_clears(p, q, e, n, NULL);
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
-    gmp_fscanf(chavePublicaArq, "p = %Zd\nq = %Zd\ne = %Zd\n", p, q, e);
-
-    mpz_mul(n, p, q);
+    gmp_fscanf(chavePublicaArq, "p = %Zd\nq = %Zd\nn = %Zd\ne = %Zd\n", p, q, n, e);
 
     mpz_t pMenos1, qMenos1;
     mpz_inits(pMenos1, qMenos1, NULL);
@@ -312,14 +322,11 @@ void descriptografarMensagem()
     mpz_invert(d, e, phi);
 
     FILE *textoCriptografadoArq = fopen("texto_criptografado.txt", "r");
-
     if (textoCriptografadoArq == NULL)
     {
         printf("\nAinda nao existe um texto para ser descriptografado!\n\n");
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
@@ -329,8 +336,6 @@ void descriptografarMensagem()
         printf("\nErro ao criar o arquivo do texto descriptografado.\n\n");
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
@@ -340,11 +345,11 @@ void descriptografarMensagem()
     while (gmp_fscanf(textoCriptografadoArq, "%Zd", textoCriptografado) != EOF)
     {
         mpz_powm(textoDescriptografado, textoCriptografado, d, n);
+
         gmp_fprintf(textoDescriptografadoArq, "%c", (char)mpz_get_ui(textoDescriptografado));
     }
 
     fclose(textoCriptografadoArq);
-
     fclose(textoDescriptografadoArq);
 
     barraDeCarregamento("Descriptografia em andamento...", "Descriptografia concluida!", 50);
@@ -352,8 +357,6 @@ void descriptografarMensagem()
     printf("\nTexto descriptografado com sucesso e salvo em texto_descriptografado.txt\n\n");
 
     system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-    menuOpcoes();
-
     return;
 }
 
@@ -368,8 +371,6 @@ void exibirMensagem()
         printf("\nAinda nao existe um texto descriptografado para ser impresso!\n\n");
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
@@ -392,7 +393,5 @@ void exibirMensagem()
     printf("\nMensagem impressa com sucesso!\n\n");
 
     system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-    menuOpcoes();
-
     return;
 }
