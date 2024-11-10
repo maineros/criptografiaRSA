@@ -21,6 +21,7 @@ int main()
     return 0;
 }
 
+// apresenta o menu de opcoes para o usuario e recebe a acao desejada
 void menuOpcoes()
 {
     limparTela();
@@ -59,9 +60,8 @@ void menuOpcoes()
             break;
         case 5:
             limparTela();
-            printf("\nA equipe agradece pelo uso do programa! :)\n\n");
+            printf("\nA equipe agradece pelo uso do programa!\n\n");
             exit(0);
-            break;
         default:
             limparTela();
             printf("Opcao invalida. Tente novamente digitando um numero valido.\n");
@@ -73,6 +73,7 @@ void menuOpcoes()
     return;
 }
 
+// limpa a tela do terminal
 void limparTela()
 {
 #ifdef _WIN32
@@ -84,6 +85,7 @@ void limparTela()
     return;
 }
 
+// animacao de carregamento para o terminal
 void barraDeCarregamento(char textoCabecalho[], char textoFinal[], int duracao) 
 {
     const char spinner[] = "|/-\\";
@@ -103,6 +105,7 @@ void barraDeCarregamento(char textoCabecalho[], char textoFinal[], int duracao)
     printf("\r%s                                           \n", textoFinal);
 }
 
+// gera a chave publica com 'e' e 'n' e a imprime em um arquivo .txt
 void gerarChavePublica()
 {
     limparTela();
@@ -123,13 +126,12 @@ void gerarChavePublica()
         mpz_clears(p, q, e, n, phi, NULL);
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
 
         return;
     }
 
     // adicionando os valores da chave publica ao arquivo e fechando-o
-    gmp_fprintf(chavePublicaArq, "p = %Zd\nq = %Zd\ne = %Zd\n", p, q, e);
+    gmp_fprintf(chavePublicaArq, "p = %Zd\nq = %Zd\nn = %Zd\ne = %Zd\n", p, q, n, e);
     fclose(chavePublicaArq);
 
     // adicionando animacao de carregamento
@@ -138,12 +140,13 @@ void gerarChavePublica()
     printf("\nChave publica gerada com sucesso e salva em chave_publica.txt\n\n");
     mpz_clears(p, q, e, n, phi, NULL);
 
+    // mostra a mensagem no terminal e retorna ao menu principal
     system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-    menuOpcoes();
 
     return;
 }
 
+// recebe e calcula os valores de 'p', 'q', 'e', 'n' e 'phi'
 void receberPQE(mpz_t p, mpz_t q, mpz_t e, mpz_t n, mpz_t phi)
 {
     printf("Digite dois numeros primos p e q: ");
@@ -196,7 +199,7 @@ void receberPQE(mpz_t p, mpz_t q, mpz_t e, mpz_t n, mpz_t phi)
 // retorna 1 se o numero for primo e 0 se nao
 int ePrimo(mpz_t num)
 {
-    // retorna 2 se o numero for primo de certeza, 1 se provavelmente for primo e 0 se nao for
+    // retorna 2 se o numero for primo de certeza, 1 se provavelmente for primo e 0 se nao for primo
     return mpz_probab_prime_p(num, 50) > 0;
 }
 
@@ -216,47 +219,67 @@ int saoCoprimos(mpz_t a, mpz_t b)
     return resultado;
 }
 
-// criptografa o texto dado pelo usuario
+// criptografa o texto dado pelo usuario e o imprime em um arquivo .txt
 void criptografarMensagem()
 {
     limparTela();
     printf("\nOpcao escolhida: Criptografar mensagem.\n\n");
-
+    
     // inicializando 'p', 'q' e 'e' com a lib gmp para extrai-los do arquivo de chave publica
     mpz_t p, q, e, n;
     mpz_inits(p, q, e, n, NULL);
 
-    // abrindo o arquivo de chave publica para extrair 'p', 'q' e 'e'
-    FILE *chavePublicaArq = fopen("chave_publica.txt", "r+");
+    // pergunta ao usuario qual opcao de obtencao da chave publica ele prefere
+    printf("Deseja inserir a chave publica manualmente ou extrai-la de um arquivo chave_publica.txt?\n");
+    printf("Digite aqui (M para inserir manualmente ou A para arquivo): ");
+    
+    char escolha;
+    scanf(" %c", &escolha);
 
-    // verificando se ha alguma chave publica no arquivo indicado
-    if (chavePublicaArq == NULL)
+    switch (escolha)
     {
-        printf("\nAinda nao foi criada uma chave publica!\n\n");
+    case 'M':
+        printf("\n\nDigite o valor de \"e\": ");
+        gmp_scanf("%Zd", e);
+        printf("\nDigite o valor de \"n\": ");
+        gmp_scanf("%Zd", n);
 
-        mpz_clears(p, q, e, n, NULL);
+        break;
+    case 'A':
+        // abrindo o arquivo de chave publica para extrair 'p', 'q', 'n' e 'e'
+        FILE *chavePublicaArq = fopen("chave_publica.txt", "r+");
+
+        // verificando se ha alguma chave publica no arquivo indicado
+        if (chavePublicaArq == NULL)
+        {
+            printf("\nAinda nao foi criada uma chave publica!\n\n");
+
+            mpz_clears(p, q, e, n, NULL);
+
+            system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
+            return;
+        }
+
+        // recebendo os valores da chave publica 'p', 'q', 'n' e 'e'
+        gmp_fscanf(chavePublicaArq, "p = %Zd\nq = %Zd\nn = %Zd\ne = %Zd\n", p, q, n, e);
+
+        // fechando o arquivo de chave publica
+        fclose(chavePublicaArq);
+
+        break;
+    default:
+        printf("O caractere inserido nao eh valido.\n\n");
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
-
-    // recebendo os valores da chave publica 'p', 'q' e 'e'
-    gmp_fscanf(chavePublicaArq, "p = %Zd\nq = %Zd\ne = %Zd\n", p, q, e);
-
-    // atribuindo valor a 'n'
-    mpz_mul(n, p, q);
 
     // limpando buffer para retirar possivel "\n" do fscanf
     getchar();
 
-    // fechando o arquivo de chave publica
-    fclose(chavePublicaArq);
-
     // recebendo o texto a ser criptografado
     char texto[1001];
-    printf("Insira o texto a ser criptografado (ate 1000 caracteres): ");
+    printf("\n\nInsira o texto a ser criptografado (ate 1000 caracteres): ");
     fgets(texto, 1000, stdin);
 
     // achando o tamanho do texto
@@ -277,8 +300,6 @@ void criptografarMensagem()
         mpz_clears(textoPuro, textoCriptografado, NULL);
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
@@ -305,13 +326,13 @@ void criptografarMensagem()
 
     printf("\nTexto criptografado com sucesso e salvo em texto_criptografado.txt\n\n");
     
+    // mostra a mensagem no terminal e retorna ao menu principal
     system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-    menuOpcoes();
 
     return;
 }
 
-// funcao principal para descriptografar o texto
+// descriptografa o texto dado pelo usuario e o imprime em um arquivo .txt
 void descriptografarMensagem()
 {
     limparTela();
@@ -332,16 +353,11 @@ void descriptografarMensagem()
         mpz_clears(p, q, e, n, NULL);
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
     // recebendo os valores da chave publica 'p', 'q' e 'e'
-    gmp_fscanf(chavePublicaArq, "p = %Zd\nq = %Zd\ne = %Zd\n", p, q, e);
-
-    // atribuindo valor a 'n'
-    mpz_mul(n, p, q);
+    gmp_fscanf(chavePublicaArq, "p = %Zd\nq = %Zd\nn = %Zd\ne = %Zd\n", p, q, n, e);
 
     // declarando as variaveis para p - 1 e q - 1
     mpz_t pMenos1, qMenos1;
@@ -370,8 +386,6 @@ void descriptografarMensagem()
         printf("\nAinda nao existe um texto para ser descriptografado!\n\n");
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
@@ -384,8 +398,6 @@ void descriptografarMensagem()
         printf("\nErro ao criar o arquivo do texto descriptografado.\n\n");
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
-
         return;
     }
 
@@ -414,9 +426,8 @@ void descriptografarMensagem()
 
     printf("\nTexto descriptografado com sucesso e salvo em texto_descriptografado.txt\n\n");
 
+    // mostra a mensagem no terminal e retorna ao menu principal
     system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-    menuOpcoes();
-
     return;
 }
 
@@ -435,7 +446,6 @@ void exibirMensagem()
         printf("\nAinda nao existe um texto descriptografado para ser impresso!\n\n");
 
         system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-        menuOpcoes();
 
         return;
     }
@@ -462,7 +472,5 @@ void exibirMensagem()
     printf("\nMensagem impressa com sucesso!\n\n");
 
     system("read -p 'Retornando ao menu principal. Pressione Enter para continuar...' var");
-    menuOpcoes();
-
     return;
 }
