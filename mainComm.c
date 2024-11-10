@@ -81,7 +81,6 @@ void limparTela()
 #else
     system("clear");
 #endif
-
     return;
 }
 
