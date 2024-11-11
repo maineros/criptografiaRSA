@@ -32,7 +32,11 @@ void menuOpcoes()
 
         printf("=== PROJETO DE MATEMATICA DISCRETA: CRIPTOGRAFIA RSA ===\n\n");
         printf("Escolha uma opcao:\n");
-        printf("\t[1] - Gerar chave publica\n\t[2] - Criptografar mensagem\n\t[3] - Descriptografar mensagem\n\t[4] - Ver mensagem descriptografada\n\t[5] - Sair do programa\n\n");
+        printf("\t[1] - Gerar chave publica\n"
+                "\t[2] - Criptografar mensagem\n"
+                "\t[3] - Descriptografar mensagem\n"
+                "\t[4] - Ver mensagem descriptografada\n"
+                "\t[5] - Sair do programa\n\n");
         printf("Digite aqui: ");
 
         int opcao;
